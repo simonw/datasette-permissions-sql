@@ -99,7 +99,7 @@ If any rows are returned, the permission check passes. If no rows are returned t
 Another example table, this time granting explicit access to individual tables. Consider a table called `table_access` that looks like this:
 
 | user_id | database | table |
-| - | - | - | - |
+| - | - | - |
 | 1 | mydb | dogs |
 | 2 | mydb | dogs |
 | 1 | mydb | cats |
