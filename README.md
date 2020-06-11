@@ -18,7 +18,7 @@ Install this plugin in the same environment as Datasette.
 
 First, read up on how Datasette's [authentication and permissions system](https://datasette.readthedocs.io/en/latest/authentication.html) works.
 
-This plugin lets you define SQL queries that are executed to see if the currently authenticated actor has permission to perform certain actions.
+This plugin lets you define rules containing SQL queries that are executed to see if the currently authenticated actor has permission to perform certain actions.
 
 Consider a canned query which authenticated users should only be able to execute if a row in the `users` table says that they are a member of staff.
 
@@ -64,7 +64,7 @@ To configure the canned query to only be executable by staff users, add the foll
 }
 ```
 
-The `"datasette-permissions-sql"` key is a list of SQL matching rules. Each of those rules has the following shape:
+The `"datasette-permissions-sql"` key is a list of rules. Each of those rules has the following shape:
 
 ```json
 {
@@ -83,9 +83,7 @@ The Datasette documentation includes a [list of built-in permissions](https://da
 
 ### The SQL query
 
-If the SQL query returns any rows the permission will be allowed. If it returns no rows, the plugin hook will return `None` which means other plugins can have a go at checking permissions.
-
-If the SQL query returns a single value of `-1` it well be treated as an explicit "deny permission" response to the permission check.
+If the SQL query returns any rows the action will be allowed. If it returns no rows, the plugin hook will return `False` and deny access to that action.
 
 The SQL query is called with a number of named parameters. You can use any of these as part of the query.
 
@@ -96,26 +94,21 @@ The list of parameters is as follows:
 * `resource_2` - the second component of the resource, if available
 * `actor_*` - a parameter for every key on the actor. Usually `actor_id` is present.
 
-The SQL query can return any of three different types of result:
-
-* No rows at all means "I don't have an opinion about this permission" - which allows the default permission to apply.
-* One or more rows means "allow" - unless...
-* A single row with a single value of `-1` - which means "deny"
+If any rows are returned, the permission check passes. If no rows are returned the check fails.
 
 Another example table, this time granting explicit access to individual tables. Consider a table called `table_access` that looks like this:
 
-| user_id | database | table | access_level |
+| user_id | database | table |
 | - | - | - | - |
-| 1 | mydb | dogs | 1 |
-| 2 | mydb | dogs | 1 |
-| 1 | mydb | cats | 1 |
-| 2 | mydb | cats | -1 |
+| 1 | mydb | dogs |
+| 2 | mydb | dogs |
+| 1 | mydb | cats |
 
 The following SQL query would grant access to the `dogs` ttable in the `mydb.db` database to users 1 and 2 - but would forbid access for user 2 to the `cats` table:
 
 ```sql
 SELECT
-    access_level
+    *
 FROM
     table_access
 WHERE
@@ -142,4 +135,34 @@ plugins:
         AND "database" = :resource_1
         AND "table" = :resource_2
 ```
-We're using `allow_sql: {}` here to disable arbitrary SQL queries to prevent users from running `select * from cats` directly to work around the permissions limits.
+We're using `allow_sql: {}` here to disable arbitrary SQL queries. This prevents users from running `select * from cats` directly to work around the permissions limits.
+
+### Fallback mode
+
+The default behaviour of this plugin is to take full control of specified permissions. The SQL query will directly control if the user is allowed or denied access to the permission.
+
+This means that the default policy for each permission (which in Datasette core is "allow" for `view-database` and friends) will be ignored. It also means that any other `permission_allowed` plugins will not get their turn once this plugin has executed.
+
+You can change this on a per-rule basis using ``"fallback": true``:
+
+```json
+{
+    "action": "view-table",
+    "resource": ["mydatabase", "mytable"],
+    "sql": "select * from admins where user_id = :actor_id",
+    "fallback": true
+}
+```
+
+When running in fallback mode, a query result returning no rows will cause the plugin hook to return ``None`` - which means "I have no opinion on this permission, fall back to other plugins or the default".
+
+In this mode you can still return `False` (for "deny access") by returning a single row with a single value of `-1`. For example:
+
+```json
+{
+    "action": "view-table",
+    "resource": ["mydatabase", "mytable"],
+    "sql": "select -1 from banned where user_id = :actor_id",
+    "fallback": true
+}
+```
