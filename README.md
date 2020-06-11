@@ -6,6 +6,8 @@
 
 Datasette plugin for configuring permission checks using SQL queries
 
+**This only works with the next, unreleased version of Datasette**
+
 ## Installation
 
 Install this plugin in the same environment as Datasette.
