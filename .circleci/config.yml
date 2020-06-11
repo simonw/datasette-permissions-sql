@@ -36,6 +36,8 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -e .[test]
+            # Install latest Datasette - until 0.44 is released
+            pip install https://github.com/simonw/datasette/archive/ce4958018ede00fbdadf0c37a99889b6901bfb9b.zip
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}
           paths:
@@ -45,6 +47,8 @@ jobs:
           command: |
             . venv/bin/activate
             pip install -e .[test]
+            # Install latest Datasette - until 0.44 is released
+            pip install https://github.com/simonw/datasette/archive/ce4958018ede00fbdadf0c37a99889b6901bfb9b.zip
             pip install pytest
             pytest
   test-python-install:
@@ -64,6 +68,8 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -e .[test]
+            # Install latest Datasette - until 0.44 is released
+            pip install https://github.com/simonw/datasette/archive/ce4958018ede00fbdadf0c37a99889b6901bfb9b.zip
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}
           paths:
@@ -73,6 +79,8 @@ jobs:
           command: |
             . venv/bin/activate
             pip install -e .[test]
+            # Install latest Datasette - until 0.44 is released
+            pip install https://github.com/simonw/datasette/archive/ce4958018ede00fbdadf0c37a99889b6901bfb9b.zip
             pip install pytest
             pytest
   deploy:
@@ -88,6 +96,8 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -e .[test]
+            # Install latest Datasette - until 0.44 is released
+            pip install https://github.com/simonw/datasette/archive/ce4958018ede00fbdadf0c37a99889b6901bfb9b.zip
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}
           paths:
