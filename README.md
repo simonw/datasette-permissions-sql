@@ -71,7 +71,7 @@ The `"datasette-permissions-sql"` key is a list of rules. Each of those rules ha
     "action": "name-of-action",
     "resource": ["resource identifier to run this on"],
     "sql": "SQL query to execute",
-    "database": "mydatabas"
+    "database": "mydatabase"
 }
 ```
 
