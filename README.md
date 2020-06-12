@@ -127,7 +127,7 @@ plugins:
   - action: view-table
     sql: |-
       SELECT
-        access_level
+        *
       FROM
         table_access
       WHERE
