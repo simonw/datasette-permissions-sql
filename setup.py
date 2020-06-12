@@ -23,7 +23,7 @@ setup(
     version=VERSION,
     packages=["datasette_permissions_sql"],
     entry_points={"datasette": ["permissions_sql = datasette_permissions_sql"]},
-    install_requires=["datasette",],
+    install_requires=["datasette>=0.44",],
     extras_require={"test": ["pytest", "pytest-asyncio", "httpx", "sqlite-utils~=2.0"]},
     tests_require=["datasette-permissions-sql[test]"],
 )
